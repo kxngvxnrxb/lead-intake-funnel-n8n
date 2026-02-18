@@ -42,12 +42,8 @@ Flow:
 
 ## Screenshots
 
-Add screenshots showing:
-
-- Funnel form
-- n8n workflow
-- Google Sheets log entry
-- Email response received
+### Funnel Form
+![Funnel Form](assets/funnel-form.png)
 
 ---
 
