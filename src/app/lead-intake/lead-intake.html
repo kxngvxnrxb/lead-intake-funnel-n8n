@@ -1,0 +1,164 @@
+<div class="landing">
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="overlay">
+            <div class="hero-content">
+                <h1>Automate Your Business Without the Headache</h1>
+                <p>
+                    Funnels, CRM setup, and automation workflows built to save you time and increase conversions.
+                </p>
+                <a href="#form" class="cta">Get a Free Consultation</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- BENEFITS -->
+    <section class="benefits">
+        <div class="benefit">
+            <i class="fa-solid fa-bolt icon"></i>
+            <h3>Faster Processes</h3>
+            <p>Automate repetitive tasks and free up your time.</p>
+        </div>
+
+        <div class="benefit">
+            <i class="fa-solid fa-chart-line icon"></i>
+            <h3>More Leads</h3>
+            <p>Funnels and CRM pipelines designed for conversions.</p>
+        </div>
+
+        <div class="benefit">
+            <i class="fa-solid fa-robot icon"></i>
+            <h3>Smart Automation</h3>
+            <p>n8n and AI workflows customized for your business.</p>
+        </div>
+    </section>
+
+    <!-- FORM SECTION -->
+    <section id="form" class="form-section">
+        <div class="form-card">
+            <div class="form-head">
+                <h2>Request a Consultation</h2>
+                <p class="subtitle">We reply within 24 hours. No spam. Just clarity.</p>
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+                <div class="grid">
+
+                    <div class="control">
+                        <input type="text" formControlName="name" placeholder=" " />
+                        <label>Full Name</label>
+                        <small class="err" *ngIf="form.controls.name.touched && form.controls.name.invalid">
+                            Please enter your name.
+                        </small>
+                    </div>
+
+                    <div class="control">
+                        <input type="email" formControlName="email" placeholder=" " />
+                        <label>Email Address</label>
+                        <small class="err" *ngIf="form.controls.email.touched && form.controls.email.invalid">
+                            Please enter a valid email.
+                        </small>
+                    </div>
+
+                    <div class="control">
+                        <input type="text" formControlName="phone" placeholder=" " />
+                        <label>Phone Number</label>
+                        <small class="err" *ngIf="form.controls.phone.touched && form.controls.phone.invalid">
+                            Please enter your phone number.
+                        </small>
+                    </div>
+
+                    <div class="control">
+                        <select formControlName="service">
+                            <option value="" disabled>Select a service</option>
+                            <option>Marketing Automation</option>
+                            <option>CRM Setup</option>
+                            <option>Funnel Setup</option>
+                            <option>Workflow Automation</option>
+                        </select>
+                        <label class="select-label">Service Needed</label>
+                        <small class="err" *ngIf="form.controls.service.touched && form.controls.service.invalid">
+                            Please select a service.
+                        </small>
+                    </div>
+
+                    <div class="control">
+                        <select formControlName="budget">
+                            <option value="" disabled>Select a budget</option>
+                            <option>Under $500</option>
+                            <option>$500 - $1,000</option>
+                            <option>$1,000+</option>
+                        </select>
+                        <label class="select-label">Budget Range</label>
+                        <small class="err" *ngIf="form.controls.budget.touched && form.controls.budget.invalid">
+                            Please select a budget.
+                        </small>
+                    </div>
+
+                    <div class="control">
+                        <select formControlName="preferredContact">
+                            <option>Email</option>
+                            <option>Phone</option>
+                        </select>
+                        <label class="select-label">Preferred Contact</label>
+                    </div>
+
+                    <div class="control full">
+                        <textarea rows="5" formControlName="message" placeholder=" "></textarea>
+                        <label>Tell us about your project</label>
+                        <small class="err" *ngIf="form.controls.message.touched && form.controls.message.invalid">
+                            Please share a bit more detail (min 10 characters).
+                        </small>
+                    </div>
+
+                    <div class="consent full">
+                        <label class="check">
+                            <input type="checkbox" formControlName="consent" />
+                            <span>I agree to be contacted regarding my inquiry.</span>
+                        </label>
+                        <small class="err" *ngIf="form.controls.consent.touched && form.controls.consent.invalid">
+                            Consent is required.
+                        </small>
+                    </div>
+                </div>
+
+                <button type="submit" [disabled]="isSubmitting">
+                    <span *ngIf="!isSubmitting">Get a Free Consultation</span>
+                    <span *ngIf="isSubmitting">Submitting…</span>
+                </button>
+
+                <p class="success" *ngIf="success">✅ Submitted! We’ll reach out soon.</p>
+                <p class="error" *ngIf="error">{{ error }}</p>
+
+                <div class="fineprint">
+                    <span>Secure form</span>
+                    <span>•</span>
+                    <span>Powered by n8n automation</span>
+                    <span>•</span>
+                    <span>AI lead scoring enabled</span>
+                </div>
+
+                <div class="trust-row">
+                    <div class="badge">n8n</div>
+                    <div class="badge">Google Sheets</div>
+                    <div class="badge">Gmail</div>
+                    <div class="badge">AI</div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+
+    <!-- TRUST SECTION -->
+    <section class="trust">
+        <p>Tools & Platforms</p>
+        <div class="logos">
+            <span>n8n</span>
+            <span>Google Workspace</span>
+            <span>CRM Systems</span>
+            <span>Automation</span>
+        </div>
+    </section>
+
+</div>
