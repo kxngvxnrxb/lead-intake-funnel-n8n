@@ -34,9 +34,9 @@ Flow:
 
 ## Repository Structure
 
-frontend/ → Angular lead intake form
-workflow/ → Exported n8n workflow (JSON)
-assets/ → Screenshots and demo media
+- frontend/ → Angular lead intake form
+- workflow/ → Exported n8n workflow (JSON)
+- assets/ → Screenshots and demo media
 
 ---
 
