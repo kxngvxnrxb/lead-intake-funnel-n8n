@@ -45,6 +45,15 @@ Flow:
 ### Funnel Form
 ![Funnel Form](assets/funnel-form.png)
 
+### n8n Workflow
+![n8n Workflow](assets/n8n-workflow.png)
+
+### Sample Email Response
+![Email Response](assets/sample-email-response.png)
+
+### Sample Calendar Setup
+![Calendar Setup](assets/sample-calendar-setup.png)
+
 ---
 
 ## Tools Used
