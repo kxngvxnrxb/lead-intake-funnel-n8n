@@ -1,0 +1,1171 @@
+{
+  "name": "AI Lead Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7d5ff433-043a-4474-89c2-4c69209e8cbe",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "be5f63c6-407d-438a-a584-2fc648a8a014",
+      "name": "Webhook",
+      "webhookId": "7d5ff433-043a-4474-89c2-4c69209e8cbe"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        368,
+        208
+      ],
+      "id": "2582b482-a3ec-4f68-acb3-802c1a196cb8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GzZB1QFK5O0xyivB",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"priority\": \"Low\",\n    \"category\": \"Automation\",\n    \"summary\": \"King Venreb inquired about Marketing Automation with a limited budget of $500-$1,000 and a generic 'test test test' message.\",\n    \"questions\": [\n      \"Given your 'test test test' message, could you please clarify what prompted your inquiry about Marketing Automation?\",\n      \"What specific marketing challenges or goals are you hoping to address with automation within your indicated budget of $500-$1,000?\",\n      \"Could you tell us a bit more about your business and your current marketing setup?\"\n    ],\n    \"nextAction\": \"Send an email acknowledging the inquiry, asking for clarification on the 'test' message, and requesting more details about their needs and business goals to determine if their budget aligns with typical Marketing Automation solutions.\"\n  }"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        208
+      ],
+      "id": "bf06d3ff-23a9-4995-9c9c-3c8682fd14d3",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a sales intake assistant.\n\nIMPORTANT RULES (must follow):\n- If budget is \"$1,000+\" then priority MUST be \"High\"\n- If budget is \"$500 - $1,000\" then priority MUST be \"Medium\"\n- If budget is \"Under $500\" then priority MUST be \"Low\"\n\nAnalyze this lead:\n\nName: {{$json.name}}\nService: {{$json.service}}\nBudget: {{$json.budget}}\nMessage: {{$json.message}}\n\nReturn:\n1. Priority (High / Medium / Low)\n2. Category (Automation / Funnel / CRM / Other)\n3. Short summary (1 sentence)\n4. 3 clarifying questions\n5. Suggested next action\n\nReturn exactly this JSON shape:\n\n{\n  \"priority\": \"\",\n  \"category\": \"\",\n  \"summary\": \"\",\n  \"questions\": [\"\", \"\", \"\"],\n  \"nextAction\": \"\"\n}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f7625f51-280c-4ec3-b7fd-15b69b66b074",
+      "name": "Lead Brief",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1c512f12-7682-4eb2-aab7-151681ed1381",
+                    "leftValue": "={{ $json.output.priority }}",
+                    "rightValue": "High",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "High Priority Queue"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1f18bad4-85f1-4aa9-ae85-65db63eab798",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "Funnel",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Funnel Team"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2fe4dbec-f656-4762-ac07-535a605961a0",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "CRM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CRM Team"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9b893d78-8b94-40a9-bf43-924631a8a048",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "Automation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "General Automation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        912,
+        -48
+      ],
+      "id": "d002fc0c-24c3-489d-8d21-b485f79e44ea",
+      "name": "Category/Priority"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IbQMWF5VajWZeQKAckgadJN_HoUyidiAGpD_p5xkYhQ",
+          "mode": "list",
+          "cachedResultName": "CRM intake sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IbQMWF5VajWZeQKAckgadJN_HoUyidiAGpD_p5xkYhQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IbQMWF5VajWZeQKAckgadJN_HoUyidiAGpD_p5xkYhQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Lead ID": "={{ $json.leadId }}",
+            "Timestamp": "={{ $json.submittedAt }}",
+            "Name": "={{ $json.name }}",
+            "Email": "={{ $json.email }}",
+            "Phone": "={{ $json.phone }}",
+            "Service": "={{ $json.service }}",
+            "Budget": "={{ $json.budget }}",
+            "Category": "={{ $json.output.category }}",
+            "Priority": "={{ $json.output.priority }}",
+            "Summary": "={{ $json.output.summary }}",
+            "Next Best Action": "={{ $json.output.nextAction }}",
+            "Owner Queue": "={{ $json.ownerQueue }}",
+            "Status": "={{ $json.status }}",
+            "Question 1": "={{ $json.output.questions[0] }}",
+            "Question 2": "={{ $json.output.questions[1] }}",
+            "Question 3": "={{ $json.output.questions[2] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Lead ID",
+              "displayName": "Lead ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next Best Action",
+              "displayName": "Next Best Action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Owner Queue",
+              "displayName": "Owner Queue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Question 1",
+              "displayName": "Question 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Question 2",
+              "displayName": "Question 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Question 3",
+              "displayName": "Question 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1408,
+        16
+      ],
+      "id": "17309fdc-4317-495f-8809-df4fd67e634b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KqhyHrs10Yb9LVPd",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a3466cb4-58a4-4b96-86f2-6f0ea9a766df",
+              "name": "leadId",
+              "value": "={{$now.toMillis()}}-{{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "1ea7b8b3-6957-4bd4-9961-933388fa98ae",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "443c0b71-1ebc-4ce7-82d3-5090560302bd",
+              "name": "email",
+              "value": "={{ $json.body.email }}",
+              "type": "string"
+            },
+            {
+              "id": "5d77fca5-a845-47e8-b5b6-32669952a511",
+              "name": "phone",
+              "value": "={{ $json.body.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "99923b88-23ad-41a9-b56c-1c1da6ab2069",
+              "name": "service",
+              "value": "={{ $json.body.service }}",
+              "type": "string"
+            },
+            {
+              "id": "d227d575-1309-44e0-8092-a5b4b8404a9b",
+              "name": "budget",
+              "value": "={{ $json.body.budget }}",
+              "type": "string"
+            },
+            {
+              "id": "255a362b-87c9-4965-b031-4a549ba1b077",
+              "name": "message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "87306e24-6d70-4f7f-90ca-6cdf6978035d",
+              "name": "submittedAt",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "cc6c6422-0233-4a73-a7ba-69d4472d1dec",
+      "name": "Lead Base Field"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        736,
+        -16
+      ],
+      "id": "e601eda5-0d30-4a70-bb5a-368c282264c0",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "941a7d7b-7de0-488d-a461-9cad404c4839",
+              "name": "ownerQueue",
+              "value": "High Priority",
+              "type": "string"
+            },
+            {
+              "id": "6b6b7be1-35ca-4573-bc65-877620a29c5d",
+              "name": "status",
+              "value": "Intake Completed",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        -176
+      ],
+      "id": "d879fce9-63c2-4a9e-80e0-a8f9cf733935",
+      "name": "High Prio Set"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "941a7d7b-7de0-488d-a461-9cad404c4839",
+              "name": "ownerQueue",
+              "value": "General Automation",
+              "type": "string"
+            },
+            {
+              "id": "6b6b7be1-35ca-4573-bc65-877620a29c5d",
+              "name": "status",
+              "value": "Intake Completed",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        272
+      ],
+      "id": "114990fe-7866-4f0a-87d9-d57d85a9a191",
+      "name": "General Set"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "941a7d7b-7de0-488d-a461-9cad404c4839",
+              "name": "ownerQueue",
+              "value": "CRM Team",
+              "type": "string"
+            },
+            {
+              "id": "6b6b7be1-35ca-4573-bc65-877620a29c5d",
+              "name": "status",
+              "value": "Intake Completed",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        112
+      ],
+      "id": "250439da-22e2-4c66-a953-2cc17411f714",
+      "name": "CRM Team Set"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "941a7d7b-7de0-488d-a461-9cad404c4839",
+              "name": "ownerQueue",
+              "value": "Funnel Team",
+              "type": "string"
+            },
+            {
+              "id": "6b6b7be1-35ca-4573-bc65-877620a29c5d",
+              "name": "status",
+              "value": "Intake Completed",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        -32
+      ],
+      "id": "feed5ae6-dbfb-4b67-95ae-aa459d8d2492",
+      "name": "Funnel Team Set"
+    },
+    {
+      "parameters": {
+        "sendTo": "kingvenrebquirantenarag@gmail.com",
+        "subject": "=[{{ $json.Priority }}] New {{ $json.Category }} lead — {{ $json.Name }}",
+        "message": "=<h2>New Lead Intake</h2>\n\n<p><b>Name:</b> {{$json.Name}}</p>\n<p><b>Email:</b> {{$json.Email}}</p>\n<p><b>Phone:</b> {{$json.Phone}}</p>\n\n<hr />\n\n<p><b>Service:</b> {{$json.Service}}</p>\n<p><b>Budget:</b> {{$json.Budget}}</p>\n<p><b>Category:</b> {{$json.Category}}</p>\n<p><b>Priority:</b> {{$json.Priority}}</p>\n<p><b>Owner/Queue:</b> {{$json['Owner Queue']}}</p>\n\n<hr />\n\n<p><b>Summary (AI):</b><br/>{{$json.Summary}}</p>\n<p><b>Next Best Action (AI):</b><br/>{{$json['Next Best Action']}}</p>\n\n<p><b>Clarifying Questions:</b></p>\n<ul>\n  <li>{{ $json[\"Question 1\"] }}</li>\n  <li>{{ $json[\"Question 2\"] }}</li>\n  <li>{{ $json[\"Question 3\"] }}</li>\n</ul>\n\n\n<hr />\n<p style=\"color:#64748b;font-size:12px;\">\nLead ID: {{$json['Lead ID']}} • Submitted: {{$json.Timestamp}}\n</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        16
+      ],
+      "id": "d243f369-1fe3-4a23-a356-4e52d4868d14",
+      "name": "Internal notification email",
+      "webhookId": "059b0afb-199b-4f2a-9817-b484823e7ae5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "b2ntJtprvRS48xqc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "We received your request — next steps",
+        "message": "=<p>Hi {{$json.Name}},</p>\n\n<p>Thanks for reaching out about <b>{{$json.Service}}</b>. I received your request and will get back to you shortly.</p>\n\n<p>To make sure we recommend the best next step, quick questions:</p>\n<ol>\n  <li>{{ $json[\"Question 1\"] }}</li>\n  <li>{{ $json[\"Question 2\"] }}</li>\n  <li>{{ $json[\"Question 3\"] }}</li>\n</ol>\n\n<p>Reply to this email with your answers and we’ll move forward.</p>\n\n<p>Best regards,<br/>King</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        192
+      ],
+      "id": "e41d65bb-3b9d-42f6-ad32-9d2a6bb08852",
+      "name": "Confirmation email to the lead",
+      "webhookId": "a84e105a-fdf9-40d5-b5a3-4de1d5c74051",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "b2ntJtprvRS48xqc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "17614d26-a40d-4cfc-ac97-67999d153cf3",
+              "leftValue": "={{ $json.Priority }}",
+              "rightValue": "High",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1616,
+        -128
+      ],
+      "id": "239129d5-ff14-4d17-bba2-3a3855c13e30",
+      "name": "If Priority is High"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "2ea03fc5d63ff75817509fa18beca4761c4d6cbd0ca92f21d377949d4db5f94f@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "n8n Calendar"
+        },
+        "start": "={{ $now.plus({ minutes: 30 }).toISO() }}",
+        "end": "={{ $now.plus({ minutes: 60 }).toISO() }}",
+        "additionalFields": {
+          "attendees": [
+            "kingvenrebquirantenarag@gmail.com"
+          ],
+          "description": "=Lead ID: {{ $json[\"Lead ID\"] }}\nEmail: {{ $json.Email }}\nPhone: {{ $json.Phone }}\n\nService: {{ $json.Service }}\nBudget: {{ $json.Budget }}\nPriority: {{ $json.Priority }}\nCategory: {{ $json.Category }}\nQueue: {{ $json[\"Owner Queue\"] }}\n\nSummary:\n{{ $json.Summary }}\n\nNext Best Action:\n{{ $json[\"Next Best Action\"] }}\n\nQuestions:\n1) {{ $json[\"Question 1\"] }}\n2) {{ $json[\"Question 2\"] }}\n3) {{ $json[\"Question 3\"] }}\n",
+          "summary": "=Discovery Call: {{ $json.Name }} ({{ $json.Service }})"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1840,
+        -144
+      ],
+      "id": "e310eb94-2217-4574-b492-e525266b7fb7",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "gKkCNqg76sgmktlN",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1IbQMWF5VajWZeQKAckgadJN_HoUyidiAGpD_p5xkYhQ",
+          "mode": "list",
+          "cachedResultName": "CRM intake sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IbQMWF5VajWZeQKAckgadJN_HoUyidiAGpD_p5xkYhQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IbQMWF5VajWZeQKAckgadJN_HoUyidiAGpD_p5xkYhQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Lead ID": "={{ $('Append row in sheet').item.json[\"Lead ID\"] }}",
+            "Status": "Discovery Scheduled",
+            "Calendar Link": "={{ $json.htmlLink }}"
+          },
+          "matchingColumns": [
+            "Lead ID"
+          ],
+          "schema": [
+            {
+              "id": "Lead ID",
+              "displayName": "Lead ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Service",
+              "displayName": "Service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Summary",
+              "displayName": "Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Next Best Action",
+              "displayName": "Next Best Action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Owner Queue",
+              "displayName": "Owner Queue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Question 1",
+              "displayName": "Question 1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Question 2",
+              "displayName": "Question 2",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Question 3",
+              "displayName": "Question 3",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Calendar Link",
+              "displayName": "Calendar Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2048,
+        -144
+      ],
+      "id": "81360e1a-0b6c-446b-a224-52410430339f",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KqhyHrs10Yb9LVPd",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## AI Lead Intake & Qualification Automation\n### Objective\nBuild a real-world lead intake workflow that captures leads from a custom Angular funnel, analyzes them using AI, assigns priority and category, routes them to the correct queue, and records the results in a CRM-style sheet while sending notifications and scheduling follow-ups.\n\n### Tools Used\n• Angular (Lead intake landing page and form)\n• n8n (Workflow automation)\n• Google Sheets (Lead tracking / mini CRM)\n• Gmail API (Notifications and responses)\n• Google Calendar (Discovery scheduling)\n• Google Gemini AI (Lead analysis and enrichment)\n• Docker (Local automation environment)\n\n### Workflow Overview\n1. A visitor submits a lead form from a custom Angular landing page.\n2. The form sends data to an n8n webhook.\n3. Lead data is normalized and assigned a Lead ID and timestamp.\n4. Budget is evaluated to determine priority (High / Medium / Low).\n5. AI analyzes the lead and generates:\n    • Category\n    • Summary\n    • Clarifying questions\n    • Suggested next action\n6. Leads are routed based on category and priority.\n7. Data is saved into a Google Sheets CRM tracker.\n8. An internal email notification is sent with a structured lead brief.\n9. High-priority leads automatically create a Google Calendar event for follow-up.\n\n### Features Implemented\n• AI-powered lead classification\n• Priority scoring based on business rules\n• Automated routing using Switch logic\n• Structured lead brief generation\n• CRM-style logging\n• Automated notifications\n• Calendar scheduling\n• End-to-end funnel automation",
+        "height": 912,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -704,
+        -880
+      ],
+      "typeVersion": 1,
+      "id": "49df7b90-3f67-4179-841e-516ce35de576",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### Sample Business Use Case\nThis system simulates how a marketing automation agency handles incoming inquiries by:\n• Capturing leads from landing pages\n• Automatically qualifying prospects\n• Prioritizing high-value leads\n• Scheduling follow-ups efficiently\n\n### Key Learning Outcomes\n• Designing real-world automation workflows\n• Integrating front-end forms with backend automation\n• Using AI for business process automation\n• Structuring data for CRM workflows\n• Managing automation environments with Docker",
+        "height": 336,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -704,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "fe0131d8-740f-4218-818c-9d4febe6e2b1",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Lead Base Field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Lead Brief",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Lead Brief",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Brief": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Category/Priority": {
+      "main": [
+        [
+          {
+            "node": "High Prio Set",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Funnel Team Set",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CRM Team Set",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "General Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Internal notification email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Confirmation email to the lead",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If Priority is High",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Base Field": {
+      "main": [
+        [
+          {
+            "node": "Lead Brief",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Category/Priority",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High Prio Set": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Funnel Team Set": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CRM Team Set": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "General Set": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Internal notification email": {
+      "main": [
+        []
+      ]
+    },
+    "If Priority is High": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "04984772-9047-424d-9956-13f6afde1ee8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "75a203da2afa4f9088428b5121cafd52867cf04f552dbee25573576faa37906a"
+  },
+  "id": "C88uh8ar6930sZsl",
+  "tags": []
+}
